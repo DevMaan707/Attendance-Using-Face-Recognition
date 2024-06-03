@@ -7,3 +7,4 @@ torch
 numpy
 matplotlib
 keras_facenet
+ultralytics
