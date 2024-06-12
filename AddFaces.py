@@ -33,8 +33,8 @@ while True:
         payload = {'htno': htno, 'embeddings': json.dumps(embeddings)}
         response = requests.post(server_url+'/putData', json=payload)
         print("Sent!")
-    except :
-        print("Exception Occurred")
+    except Exception as e:
+        print(f"Exception Occurred => {e}")
     if k==ord('q'):
         break
 video.release()
