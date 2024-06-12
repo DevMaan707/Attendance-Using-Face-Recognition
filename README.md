@@ -1,6 +1,6 @@
-#Attendance-Using-Face-Recognition
+# Attendance-Using-Face-Recognition
 
-##Information
+## Information
 This project implements an attendance system using facial recognition technology. The following components and technologies were utilized:
 
  - YOLOv10: Used to track students entering and exiting the classroom.
