@@ -29,6 +29,7 @@ app.use('/update',require('./routes/index'))
 app.use('/train',require('./routes/index'));
 app.use('/putFace',require('./routes/index'));
 app.use('/predict',require('./routes/index'))
+app.use('/attendance',require('./routes/index'))
 //app.use('/auth',require('./server/routes/auth'));
 
 //Staring 

@@ -12,6 +12,6 @@ app.get('/update',mainController.update)
 app.post('/putFace',dataController.putData)
 app.get('/train',dataController.train)
 app.post('/predict',dataController.predict)
-
+app.post('/attendance',dataController.attendance)
 //exports
 module.exports = app;

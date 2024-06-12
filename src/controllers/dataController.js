@@ -72,3 +72,7 @@ exports.predict = async (req, res) => {
         res.status(200).json({ message: 'Prediction completed', result: JSON.parse(result) });
     });
 };
+
+exports.attendance = async(req,res)=>{
+    console.log("Savir do this ;)")
+}
