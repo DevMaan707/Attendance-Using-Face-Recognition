@@ -1,121 +1,74 @@
 const fs = require('fs');
 const path = require('path');
-const express = require('express');
-const bodyParser = require('body-parser');
-const {spawn} = require('child_process');
+const { spawn } = require('child_process');
 
 exports.putData = async (req, res) => {
-    console.log("PutData")
-    const { htno, images } = req.body;
-
-    const extracted_faces = JSON.parse(images);
+    console.log("PutData");
+    const { htno, embeddings } = req.body;
 
     const dataDir = path.join(__dirname, '../data');
     if (!fs.existsSync(dataDir)) {
         console.log('Data directory does not exist. Creating...');
         fs.mkdirSync(dataDir);
     }
-    const namesFilePath = path.join(dataDir, 'names.json');
-    const facesDataFilePath = path.join(dataDir, 'faces_data.json');
 
-    let names = [];
-    let nNames= new Array(10).fill(htno);
-    if (fs.existsSync(namesFilePath)) {
-        names = JSON.parse(fs.readFileSync(namesFilePath));
-        names.push(...nNames);
-    } else {
-        names = new Array(10).fill(htno);
+    const embeddingsFilePath = path.join(dataDir, 'embeddings.json');
+    
+    let embeddingsData = {};
+    if (fs.existsSync(embeddingsFilePath)) {
+        embeddingsData = JSON.parse(fs.readFileSync(embeddingsFilePath));
     }
-
-    let facesData = [];
-    if (fs.existsSync(facesDataFilePath)) {
-        facesData = JSON.parse(fs.readFileSync(facesDataFilePath));
-    }  
-
-    extracted_faces.forEach((base64Image, index) => {
-    const imageData = Buffer.from(base64Image, 'base64');
-    const imagesDir = path.join(dataDir, 'images', htno); // Corrected line
-    if (!fs.existsSync(imagesDir)) {
-        console.log('Images directory does not exist. Creating...');
-        fs.mkdirSync(imagesDir, { recursive: true });
+    
+    if (!embeddingsData[htno]) {
+        embeddingsData[htno] = [];
     }
-    const imageFilePath = path.join(imagesDir, `image_${index}.png`);
-    fs.writeFileSync(imageFilePath, imageData);
-    facesData.push(imageFilePath);
-    });
+    embeddingsData[htno].push(...embeddings);
 
-    fs.writeFileSync(namesFilePath, JSON.stringify(names));
-    fs.writeFileSync(facesDataFilePath, JSON.stringify(facesData));
-
-    res.status(200).json({ message: 'Images saved successfully' });
-    //train();
+    fs.writeFileSync(embeddingsFilePath, JSON.stringify(embeddingsData));
+    
+    res.status(200).json({ message: 'Embeddings saved successfully' });
+    
 };
 
+exports.train = async (req, res) => {
+    console.log("Train");
+    const pythonScript = path.join(__dirname, '../trainModel.py');
+    const pythonProcess = spawn('python', [pythonScript]);
 
-exports.train= async(req,res)=>{
-    console.log("Train")
-    const pythonScript = path.join(__dirname,'../trainModel.py');
-    const pythonProcess = spawn('python',[pythonScript]);
     pythonProcess.stdout.on('data', (data) => {
         console.log(`Python script stdout: ${data}`);
     });
-    
+
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Python script stderr: ${data}`);
     });
-    
-    
+
     pythonProcess.on('close', (code) => {
         console.log(`Python script exited with code ${code}`);
     });
-    res.status(200).json({ message: 'Trained saved successfully'});
-}
 
-exports.predict = async (req,res)=>{
-    console.log("Helloww")
-    const {images} = req.body;
-    const faces = JSON.parse(images);
+    res.status(200).json({ message: 'Training initiated' });
+};
 
-    const dataDir = path.join(__dirname, '../data');
-    if (!fs.existsSync(dataDir)) {
-        console.log('Data directory does not exist. Creating...');
-        fs.mkdirSync(dataDir);
-    }
+exports.predict = async (req, res) => {
+    console.log("Predict");
+    const { embeddings } = req.body;
 
-    const predDir = path.join(dataDir, 'images','prediction');
-    if (!fs.existsSync(predDir)) {
-        console.log('Data directory does not exist. Creating...');
-        fs.mkdirSync(predDir);
-    }
+    const embeddingsString = JSON.stringify(embeddings);
+    const pythonScript = path.join(__dirname, '../predict.py');
+    const pythonProcess = spawn('python', [pythonScript, embeddingsString]);
 
-    faces.forEach((base64Image, index) => {
-        const imageData = Buffer.from(base64Image, 'base64');
-        const imagesDir = path.join(dataDir, 'images', 'prediction');
-        if (!fs.existsSync(imagesDir)) {
-            console.log('Images directory does not exist. Creating...');
-            fs.mkdirSync(imagesDir, { recursive: true });
-        }
-        const imageFilePath = path.join(imagesDir, `image_${index}.png`);
-        fs.writeFileSync(imageFilePath, imageData);
-        //facesData.push(imageFilePath);
-        });
-
-
-    const pythonScript = path.join(__dirname,'../predict.py');
-    const pythonProcess = spawn('python',[pythonScript]);
+    let result = '';
     pythonProcess.stdout.on('data', (data) => {
-        console.log(`Python script stdout: ${data}`);
+        result += data.toString();
     });
-    
+
     pythonProcess.stderr.on('data', (data) => {
         console.error(`Python script stderr: ${data}`);
     });
-    
-    
+
     pythonProcess.on('close', (code) => {
         console.log(`Python script exited with code ${code}`);
+        res.status(200).json({ message: 'Prediction completed', result: JSON.parse(result) });
     });
-    res.status(200).json({ message: 'Trained saved successfully'});
-}
-
-
+};
