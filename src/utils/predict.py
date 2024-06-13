@@ -3,6 +3,10 @@ import json
 import sys
 import pickle
 from sklearn.preprocessing import LabelEncoder
+import requests
+from collections import Counter
+
+server_url = "http://localhost:8080"
 
 class Predict:
     def __init__(self):
@@ -39,3 +43,7 @@ if __name__ == "__main__":
     predictor = Predict()
     predictions = predictor.predict(embeddings)
     print(json.dumps(predictions))
+    d = dict((i:predictions.count(i)) for i in predictions)
+    result = max(d,key= d.get)
+    try;
+    _ = request.get(server_url+'/attendance')
