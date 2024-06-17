@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.0",
+    "nodemon": "^3.1.2",
+    "passport": "^0.7.0"
+  },
+  "name": "face-recognition",
+  "version": "1.0.0",
+  "description": "App to implement Facial Recognition in Attendance",
+  "main": "app.js",
+  "scripts": {
+    "test": "test",
+    "start": "nodemon app.js"
+  },
+  "author": "Aymaan",
+  "license": "ISC"
+}
