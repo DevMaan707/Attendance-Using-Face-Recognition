@@ -83,3 +83,4 @@ exports.attendance = async (req, res) => {
 
     return res.status(200).json({ Hallticket, Status });
 };
+

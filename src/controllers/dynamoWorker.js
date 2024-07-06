@@ -17,7 +17,7 @@ const addInTime = async (htno, time) => {
         TableName: "Student",
         Item: marshall({
             "Hall Ticket no.": htno,
-            "Intime": time.toString(),
+            "Intime": time,
             "Outtime": null,
             "temp_in": null,
             "temp_out": null,
@@ -35,9 +35,9 @@ const addOutTime = async (htno, time) => {
             "Hall Ticket no.": htno
         }),
         UpdateExpression: "SET Outtime = :time",
-        ExpressionAttributeValues: {
-            ":time": { S: time.toString() }
-        }
+        ExpressionAttributeValues: marshall({
+            ":time": time
+        })
     };
     const command = new UpdateItemCommand(params);
     await client.send(command);
@@ -50,9 +50,9 @@ const addTempInTime = async (htno, time) => {
             "Hall Ticket no.": htno
         }),
         UpdateExpression: "SET temp_in = :time",
-        ExpressionAttributeValues: {
-            ":time": { S: time.toString() }
-        }
+        ExpressionAttributeValues: marshall({
+            ":time": time
+        })
     };
     const command = new UpdateItemCommand(params);
     await client.send(command);
@@ -65,9 +65,9 @@ const addTempOutTime = async (htno, time) => {
             "Hall Ticket no.": htno
         }),
         UpdateExpression: "SET temp_out = :time",
-        ExpressionAttributeValues: {
-            ":time": { S: time.toString() }
-        }
+        ExpressionAttributeValues: marshall({
+            ":time": time
+        })
     };
     const command = new UpdateItemCommand(params);
     await client.send(command);
@@ -80,9 +80,9 @@ const addBreakTime = async (htno, time) => {
             "Hall Ticket no.": htno
         }),
         UpdateExpression: "SET BREAK = :time",
-        ExpressionAttributeValues: {
-            ":time": { S: time.toString() }
-        }
+        ExpressionAttributeValues: marshall({
+            ":time": time
+        })
     };
     const command = new UpdateItemCommand(params);
     await client.send(command);
@@ -91,13 +91,17 @@ const addBreakTime = async (htno, time) => {
 parentPort.on('message', async (message) => {
     try {
         const { action, htno, time } = message;
+        console.log(`Received action: ${action} for htno: ${htno} at time: ${time}`);
+
         if (action === 'addInTime') await addInTime(htno, time);
         else if (action === 'addOutTime') await addOutTime(htno, time);
         else if (action === 'addTempInTime') await addTempInTime(htno, time);
         else if (action === 'addTempOutTime') await addTempOutTime(htno, time);
         else if (action === 'addBreakTime') await addBreakTime(htno, time);
+
         parentPort.postMessage({ status: 'success' });
     } catch (error) {
+        console.error(`Error in worker action: ${action}`, error);
         parentPort.postMessage({ status: 'error', error: error.message });
     }
 });

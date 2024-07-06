@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const { getUserData, getIntime, getOuttime, getTempIntime, getTempOuttime } = require("./user_status");
 const moment = require("moment");
 
-const htno = "DEV1V1bbbbbbbbddddbbV1V1V1VMAN"; // Assuming htno is provided manually or from a configuration
+const htno = "DEV1V1bbbbbbbbfdghsjdskmbvddddbbV1V1V1VMAN"; // Assuming htno is provided manually or from a configuration
 
 let awsoptions = {
     region: "eu-north-1",
@@ -15,10 +15,10 @@ let awsoptions = {
     }
 };
 
-const lectureStartTime = moment('22:01', 'HH:mm');
-const lectureEndTime = moment('22:05', 'HH:mm');
-const PeriodStart = moment('22:00', 'HH:mm');
-const PeriodEnd = moment('22:04', 'HH:mm');
+const lectureStartTime = moment('22:26', 'HH:mm');
+const lectureEndTime = moment('22:31', 'HH:mm');
+const PeriodStart = moment('22:25', 'HH:mm');
+const PeriodEnd = moment('22:30', 'HH:mm');
 
 const client = new DynamoDBClient(awsoptions);
 const app = express();
