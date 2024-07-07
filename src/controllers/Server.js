@@ -6,24 +6,31 @@ const axios = require('axios');
 const { getUserData, getIntime, getOuttime, getTempIntime, getTempOuttime } = require("./user_status");
 const dataController = require('./dataController');
 
-const htno = "DEV1V1bbbbsdfghjkbbbbddddfghjkdbbV1V1V1VMAN"; // Assuming htno is provided manually or from a configuration
-
-const graceStartTime = moment('22:36', 'HH:mm');
-const graceEndTime = moment('22:41', 'HH:mm');
-const PeriodStart = moment('22:35', 'HH:mm');
-const PeriodEnd = moment('22:40', 'HH:mm'); // Adjusted to ensure logical PeriodEnd time
+const graceStartTime = moment('23:06', 'HH:mm');
+const graceEndTime = moment('23:11', 'HH:mm');
+const PeriodStart = moment('23:05', 'HH:mm');
+const PeriodEnd = moment('23:10', 'HH:mm'); // Adjusted to ensure logical PeriodEnd time
 
 const app = express();
 app.use(bodyParser.json());
 
+
+app.post('/attendance', dataController.attendance);
+
 app.post('/insert', async (req, res) => {
     try {
+        const { Hallticket } = req.body; // Get Hallticket from the request body
+
+        if (!Hallticket) {
+            return res.status(400).json({ error: "Hallticket is required" });
+        }
+
         const currentTime = moment().format('HH:mm');
-        const userData = await getUserData(htno);
-        const EnteredIntime = await getIntime(htno);
-        const EnteredOuttime = await getOuttime(htno);
-        const EnteredTempintime = await getTempIntime(htno);
-        const EnteredTempoutime = await getTempOuttime(htno);
+        const userData = await getUserData(Hallticket);
+        const EnteredIntime = await getIntime(Hallticket);
+        const EnteredOuttime = await getOuttime(Hallticket);
+        const EnteredTempintime = await getTempIntime(Hallticket);
+        const EnteredTempoutime = await getTempOuttime(Hallticket);
 
         let action;
         console.log(`Current Time: ${currentTime}`);
@@ -45,18 +52,18 @@ app.post('/insert', async (req, res) => {
             action = 'addTempInTime';
         } else if (currentTime > graceStartTime.format('HH:mm') && EnteredTempoutime && EnteredTempintime) {
             action = 'addTempOutTime';
-            await executeWorkerTask('addTempInTime', htno, null);
+            await executeWorkerTask('addTempInTime', Hallticket, null);
         }
 
         console.log(`Selected action: ${action}`);
 
         if (action) {
-            await executeWorkerTask(action, htno, currentTime);
+            await executeWorkerTask(action, Hallticket, currentTime);
         }
 
         if (EnteredTempintime && EnteredTempoutime) {
             const breakTime = moment.duration(moment(EnteredTempintime, 'HH:mm').diff(moment(EnteredTempoutime, 'HH:mm'))).asMinutes();
-            await executeWorkerTask('addBreakTime', htno, breakTime);
+            await executeWorkerTask('addBreakTime', Hallticket, breakTime);
         }
 
         res.status(200).json({ success: "Success data added" });
